@@ -1,6 +1,4 @@
-// Core of the project: Tarjan's strongly connected components algorithm.
-// Pure standard C++17, no Emscripten dependency, so it can be unit-tested natively.
-// The algorithm records a trace (one snapshot per visible step) that the UI replays.
+//Core architecture
 #pragma once
 #include <algorithm>
 #include <array>
@@ -22,9 +20,9 @@ struct Step {
 
 struct Result {
   std::vector<Step> steps;
-  std::vector<std::vector<int>> sccs;  // in order of discovery (reverse topological)
-  std::vector<int> comp;               // node -> scc id
-  bool verified = false;               // cross-checked against reachability closure
+  std::vector<std::vector<int>> sccs;
+  std::vector<int> comp;
+  bool verified = false;
 };
 
 class Tracer {
@@ -39,7 +37,7 @@ class Tracer {
   }
 
   Result run() {
-    for (int v = 0; v < n_; ++v) {                 // for each v in V
+    for (int v = 0; v < n_; ++v) {
       emit(OUTER, 0, v);
       if (idx_[v] < 0) { emit(CALL, 1, v); strong(v); }
     }

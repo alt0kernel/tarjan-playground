@@ -1,4 +1,3 @@
-// WebAssembly entry point. Input string: "n m a0 b0 a1 b1 ..."  Output: JSON trace.
 #include <sstream>
 #include <string>
 #include <utility>
@@ -11,7 +10,7 @@
 #endif
 
 extern "C" EMSCRIPTEN_KEEPALIVE const char* tarjan_run(const char* input) {
-  static std::string out;  // owned by the module, valid until the next call
+  static std::string out;
   std::istringstream in(input);
   int n = 0, m = 0;
   in >> n >> m;

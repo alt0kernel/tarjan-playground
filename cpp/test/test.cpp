@@ -4,7 +4,6 @@
 #include "tarjan.hpp"
 
 int main() {
-  // Known example: {0,1,2}, {3,4,5}, {6,7}
   {
     std::vector<std::pair<int,int>> e = {{0,1},{1,2},{2,0},{1,3},{3,4},{4,5},{5,3},{2,7},{7,6},{6,5},{6,7}};
     auto r = tarjan::run(8, e);
@@ -13,12 +12,9 @@ int main() {
     assert(r.comp[3] == r.comp[4] && r.comp[4] == r.comp[5]);
     assert(r.comp[6] == r.comp[7] && r.comp[0] != r.comp[3] && r.comp[3] != r.comp[6]);
   }
-  // Empty graph and isolated nodes
   assert(tarjan::run(0, {}).sccs.empty());
   assert(tarjan::run(5, {}).sccs.size() == 5);
 
-  // Randomized: verified flag + Tarjan emits SCCs in reverse topological order,
-  // so every cross-component edge u->v must satisfy comp[v] < comp[u].
   std::mt19937 rng(12345);
   for (int t = 0; t < 5000; ++t) {
     int n = 1 + rng() % 14, m = rng() % (n * 3 + 1);

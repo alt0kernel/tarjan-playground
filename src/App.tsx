@@ -4,6 +4,8 @@ import type { Trace } from './types';
 import { PRESETS, randomGraph, message, type GraphData } from './lib';
 import Graph, { type Mode } from './Graph';
 import { CodePanel, StatePanel } from './Panels';
+import About from './About';
+import { useFeatures } from './features';
 
 const HINT: Record<Mode, string> = { move: 'drag nodes', add: 'click empty space to add a node', edge: 'click a node, then another, to add an edge', delete: 'click a node or an edge to delete it' };
 
@@ -16,8 +18,8 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('move');
   const [sel, setSel] = useState<number | null>(null);
   const [err, setErr] = useState('');
+  const { features: F, toggle } = useFeatures();
 
-  // Re-run the C++ algorithm only when topology changes (not when nodes are dragged).
   const key = useMemo(() => JSON.stringify([g.nodes.map(n => n.id), g.edges]), [g]);
   useEffect(() => {
     let dead = false; setPos(-1); setPlaying(false);
@@ -27,7 +29,7 @@ export default function App() {
     runTarjan(g.nodes.length, dense).then(t => { if (!dead) { setTrace(t); setErr(''); } })
       .catch(e => { if (!dead) setErr(String(e)); });
     return () => { dead = true; };
-  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key]);
 
   const last = (trace?.steps.length ?? 0) - 1;
   useEffect(() => {
@@ -59,16 +61,16 @@ export default function App() {
     <header><h1>Tarjan’s Strongly Connected Components</h1>
       <span>Algorithm in C++ → WebAssembly · UI in React</span></header>
     <div className="bar">
-      <button className="p" disabled={!trace} onClick={() => { if (pos >= last) setPos(-1); setPlaying(p => !p); }}>{playing ? '⏸ Pause' : '▶ Play'}</button>
-      <button disabled={!trace} onClick={() => { setPlaying(false); setPos(p => Math.min(p + 1, last)); }}>Step ⏭</button>
-      <button disabled={!trace} onClick={() => { setPlaying(false); setPos(last); }}>Run to end</button>
-      <button onClick={() => { setPlaying(false); setPos(-1); }}>⟲ Reset</button>
-      <label>Speed <input type="range" min={1} max={10} value={speed} onChange={e => setSpeed(+e.target.value)} /></label>
-      <span className="sep" />
-      <label>Graph <select onChange={e => edit(() => structuredClone(PRESETS[+e.target.value].g))}>{PRESETS.map((p, i) => <option key={p.name} value={i}>{p.name}</option>)}</select></label>
-      <button onClick={() => edit(randomGraph)}>🎲 Random</button>
-      <span className="sep" />
-      {([['move', '✥ Move'], ['add', '＋ Node'], ['edge', '→ Edge'], ['delete', '✕ Delete']] as [Mode, string][]).map(([m, t]) =>
+      {F.play && <button className="p" disabled={!trace} onClick={() => { if (pos >= last) setPos(-1); setPlaying(p => !p); }}>{playing ? '⏸ Pause' : '▶ Play'}</button>}
+      {F.step && <button disabled={!trace} onClick={() => { setPlaying(false); setPos(p => Math.min(p + 1, last)); }}>Step ⏭</button>}
+      {F.end && <button disabled={!trace} onClick={() => { setPlaying(false); setPos(last); }}>Run to end</button>}
+      {F.reset && <button onClick={() => { setPlaying(false); setPos(-1); }}>⟲ Reset</button>}
+      {F.speed && <label>Speed <input type="range" min={1} max={10} value={speed} onChange={e => setSpeed(+e.target.value)} /></label>}
+      {(F.preset || F.random) && <span className="sep" />}
+      {F.preset && <label>Graph <select onChange={e => edit(() => structuredClone(PRESETS[+e.target.value].g))}>{PRESETS.map((p, i) => <option key={p.name} value={i}>{p.name}</option>)}</select></label>}
+      {F.random && <button onClick={() => edit(randomGraph)}>🎲 Random</button>}
+      {F.edit && <span className="sep" />}
+      {F.edit && ([['move', '✥ Move'], ['add', '＋ Node'], ['edge', '→ Edge'], ['delete', '✕ Delete']] as [Mode, string][]).map(([m, t]) =>
         <button key={m} className={mode === m ? 'on' : ''} onClick={() => pick(m)}>{t}</button>)}
     </div>
     {err && <div className="err">Could not load the WebAssembly module: {err}. Did you run <code>npm run build:wasm</code>?</div>}
@@ -79,13 +81,16 @@ export default function App() {
           onEdge={(a, b) => edit(d => ({ ...d, edges: d.edges.filter(e => !(e[0] === a && e[1] === b)) }))}
           onMove={(i, x, y) => setG(d => ({ ...d, nodes: d.nodes.map((n, k) => k === i ? { ...n, x, y } : n) }))} />
         <div className="msg">{message(step, label, trace?.verified)}</div>
-        <div className="legend"><span><i style={{ borderColor: 'var(--ac)' }} />current edge</span><span><i style={{ borderColor: 'var(--tx)' }} />tree edge</span>
-          <span><i style={{ borderColor: 'var(--pu)', borderTopStyle: 'dashed' }} />back edge</span><span><i style={{ borderColor: 'var(--gr)', borderTopStyle: 'dashed' }} />cross edge (ignored)</span></div>
+        {F.legend && <div className="legend"><span><i style={{ borderColor: 'var(--ac)' }} />current edge</span><span><i style={{ borderColor: 'var(--tx)' }} />tree edge</span>
+          <span><i style={{ borderColor: 'var(--pu)', borderTopStyle: 'dashed' }} />back edge</span><span><i style={{ borderColor: 'var(--gr)', borderTopStyle: 'dashed' }} />cross edge (ignored)</span></div>}
       </div>
       <div className="side">
-        <div className="card"><h2>Pseudocode</h2><CodePanel line={step?.line ?? -1} /></div>
-        <StatePanel nodes={g.nodes} step={step} trace={trace} />
+        {F.code && <div className="card"><h2>Pseudocode</h2><CodePanel line={step?.line ?? -1} /></div>}
+        <StatePanel nodes={g.nodes} step={step} trace={trace} showStacks={F.stacks} showTable={F.table} />
       </div>
     </main>
+    <button className="chev" aria-label="Scroll to the explanation" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>⌄</button>
+    <About features={F} toggle={toggle} />
+    <footer><b>Tarjan’s SCC Playground</b><span>C++ → WebAssembly · React</span></footer>
   </>);
 }

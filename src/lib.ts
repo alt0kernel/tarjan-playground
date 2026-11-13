@@ -29,7 +29,7 @@ export function randomGraph(): GraphData {
   }
   return { nodes, edges };
 }
-/** Human-readable explanation of a step. L maps dense index -> node label. */
+
 export function message(s: Step | null, L: (i: number) => number, ok = true): string {
   if (!s) return 'Press Step or Play.';
   const v = L(s.cur), w = L(s.eb);

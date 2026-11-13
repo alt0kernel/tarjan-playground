@@ -25,3 +25,16 @@ th{color:var(--mu);font-weight:500}tr.act td{background:rgba(245,158,11,.25)}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--mu);margin-top:8px}
 .legend i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:4px}
 .badge{padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600;color:#fff;text-transform:none;letter-spacing:0}
+.chev{display:block;margin:6px auto 0;width:40px;height:40px;border-radius:50%;padding:0;font-size:22px;line-height:1}
+.about{max-width:760px;margin:0 auto;padding:32px 18px 24px}
+.about section{margin-bottom:40px}
+.about h3{font-size:20px;margin:0 0 12px}
+.about p{font-size:15.5px;line-height:1.7;margin:0 0 14px;color:var(--tx)}
+.about a{color:var(--bl)}.about code{font:13px ui-monospace,Menlo,Consolas,monospace;background:var(--bg);padding:1px 5px;border-radius:4px}
+.toggles{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px 16px}
+.toggles label{color:var(--tx);font-size:14px;cursor:pointer}
+.key{list-style:none;padding:0;margin:0 0 14px;display:grid;gap:10px}
+.key li{display:flex;gap:12px;align-items:center;font-size:15px}
+.key .sw{flex:none;width:34px;display:inline-block;height:0}
+.key .sw[style*="border-radius"]{height:16px;width:16px;margin:0 9px}
+footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:24px 18px;border-top:1px solid var(--bd);background:var(--card);color:var(--mu);font-size:13px}
