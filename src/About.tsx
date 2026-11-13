@@ -73,7 +73,7 @@ export default function About({ features, toggle }: { features: Features; toggle
 
       <section>
         <h3>Credits</h3>
-        <p>Tarjan’s algorithm was published by Robert E. Tarjan in 1972. This playground is inspired by the interactive style of
+        <p>This interactive playground is developed by Nithin Krishna.Tarjan’s algorithm was published by Robert E. Tarjan in 1972. This playground is inspired by the interactive style of
           <a href="https://playground.tensorflow.org"> TensorFlow Playground</a> by Daniel Smilkov and Shan Carter.</p>
       </section>
     </article>
